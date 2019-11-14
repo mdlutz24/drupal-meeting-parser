@@ -1,0 +1,19 @@
+{
+  "name": "Drupal Slack meeting scrape",
+  "version": "1.0",
+  "description": "Scrapes a drupal migration meeting",
+  "manifest_version": 2,
+  "icons": {
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.slack.com/*"],
+      "js": ["js/scrape.js"]
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "tabs"
+  ]
+}
