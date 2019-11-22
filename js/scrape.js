@@ -58,7 +58,16 @@ let scraper = {
       if (!this.ids.includes(message.getAttribute('id')) && !message.getAttribute('id').endsWith('list_input')) {
         this.ids.push(message.getAttribute('id'));
         if (typeof(message.querySelector('a.c-message__sender_link')) !== 'undefined') {
-          this.data += "<tr><td>" + message.querySelector('a.c-message__sender_link').textContent + "</td><td>" + this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4]) + "</td></tr>\n";
+          let parsedMessage = this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4]).trim();
+          if (parsedMessage.startsWith(":bust_in_silhouette:")) {
+            this.data += "<tr><td>(<em>anonymous</em>)</td><td>" + parsedMessage.replace(":bust_in_silhouette:", '').trim() + "</td></tr>\n";
+          }
+          else if (parsedMessage.startsWith(":no_entry_sign:")) {
+            this.data += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
+          }
+          else {
+            this.data += "<tr><td>" + message.querySelector('a.c-message__sender_link').textContent + "</td><td>" + parsedMessage + "</td></tr>\n";
+          }
         }
       }
     }, this)
