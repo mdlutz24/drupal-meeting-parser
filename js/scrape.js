@@ -3,9 +3,29 @@ let scraper = {
 
   ids: [],
 
+  threadInProgress: false,
+
   clear: function () {
     this.data = ''
     this.ids = []
+  },
+
+  startThread: function() {
+    if (!this.isParsing()) {
+      this.data += "<table>\n";
+      this.threadInProgress = true;
+    }
+  },
+
+  endThread: function() {
+    if (this.isParsing()) {
+      this.data += "</table>\n\n";
+      this.threadInProgress = false;
+    }
+  },
+
+  isParsing: function() {
+    return this.threadInProgress;
   },
 
   display: function () {
@@ -17,19 +37,28 @@ let scraper = {
     document.body.removeChild(el);
   },
 
-  parseText: function(text) {
+  parseText: function(textNode) {
+    textNode = textNode.cloneNode(true);
+    let images = textNode.querySelectorAll("img");
+    images.forEach(function(image) {
+      if (image.getAttribute('data-stringify-type') === 'emoji') {
+        image.outerHTML = image.getAttribute('data-stringify-emoji');
+      }
+    });
+    let text = textNode.textContent;
     let issues = /https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/
     return text.replace(issues, '[#$1]');
   },
 
   parseThread: function() {
+    this.startThread();
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     let finished = (sidebar.scrollTop + sidebar.offsetHeight) >= sidebar.scrollHeight;
     sidebar.querySelectorAll('.c-virtual_list__item').forEach(function(message) {
       if (!this.ids.includes(message.getAttribute('id')) && !message.getAttribute('id').endsWith('list_input')) {
         this.ids.push(message.getAttribute('id'));
         if (typeof(message.querySelector('a.c-message__sender_link')) !== 'undefined') {
-          this.data += "<tr><td>" + message.querySelector('a.c-message__sender_link').textContent + "</td><td>" + this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4].textContent) + "</td></tr>\n";
+          this.data += "<tr><td>" + message.querySelector('a.c-message__sender_link').textContent + "</td><td>" + this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4]) + "</td></tr>\n";
         }
       }
     }, this)
@@ -38,7 +67,7 @@ let scraper = {
       setTimeout(this.parseThread.bind(this), 200);
     }
     else {
-      this.data += '</table>';
+      this.endThread();
     }
   },
 
@@ -48,8 +77,7 @@ let scraper = {
     let toppost = sidebar.querySelector('.c-virtual_list__item');
     this.ids.push(toppost.getAttribute('id'));
     this.ids.push(sidebar.querySelectorAll('.c-virtual_list__item')[1].getAttribute('id'));
-    this.data += "<table>\n";
-    this.data += "<tr><td>" + toppost.querySelector('a.c-message__sender_link').textContent + "</td><td><strong>" + this.parseText(toppost.querySelector('.c-message_kit__gutter__right').childNodes[4].textContent) + "</strong></td></tr>\n";
+    this.data += "<h2>" + this.parseText(toppost.querySelector('.c-message_kit__gutter__right').childNodes[4]) + "</h2>\n";
     this.parseThread();
   }
 };
