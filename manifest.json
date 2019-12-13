@@ -1,7 +1,7 @@
 {
-  "name": "Drupal Slack meeting scrape",
+  "name": "Drupal Meeting Parser",
   "version": "1.0",
-  "description": "Scrapes a drupal migration meeting",
+  "description": "Parses Drupal meeting threads for public archiving",
   "manifest_version": 2,
   "icons": {
     "128": "icon.png"
