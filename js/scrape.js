@@ -1,13 +1,13 @@
 let scraper = {
   data: '',
-
   ids: [],
-
+  users: {},
   threadInProgress: false,
 
   clear: function () {
-    this.data = ''
-    this.ids = []
+    this.data = '';
+    this.ids = [];
+    this.users = {};
   },
 
   startThread: function() {
@@ -31,6 +31,7 @@ let scraper = {
   display: function () {
     const el = document.createElement('textarea');
     el.value = this.data;
+    el.value += "\n\nParticipants:\n\n" + Object.keys(this.users).join(', ');
     document.body.appendChild(el);
     el.select();
     document.execCommand('copy');
@@ -46,6 +47,19 @@ let scraper = {
       }
     });
     let text = textNode.textContent;
+
+    text = text.replace(':zero:', '0️⃣ ');
+    text = text.replace(':one:', '1️⃣ ');
+    text = text.replace(':two:', '2️⃣ ');
+    text = text.replace(':three:', '3️⃣ ');
+    text = text.replace(':four:', '4️⃣ ');
+    text = text.replace(':five:', '5️⃣ ');
+    text = text.replace(':six:', '6️⃣ ');
+    text = text.replace(':seven:', '7️⃣ ');
+    text = text.replace(':eight:', '8️⃣ ');
+    text = text.replace(':nine:', '9️⃣ ');
+    text = text.replace(':keycap_ten:', '🔟 ');
+
     let issues = /https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/
     return text.replace(issues, '[#$1]');
   },
@@ -66,7 +80,9 @@ let scraper = {
             this.data += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
           }
           else {
-            this.data += "<tr><td>" + message.querySelector('a.c-message__sender_link').textContent + "</td><td>" + parsedMessage + "</td></tr>\n";
+            let user = message.querySelector('a.c-message__sender_link').textContent;
+            this.users[user] = user;
+            this.data += "<tr><td>" + user + "</td><td>" + parsedMessage + "</td></tr>\n";
           }
         }
       }
