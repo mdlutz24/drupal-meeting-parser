@@ -5,11 +5,11 @@ This is a bare bones Google Chrome extension to copy Drupal meeting threads to t
 
 Many Drupal teams use threaded meetings to discuss current topics. This
 extension helps to archive the meeting log from these meetings for posterity.
-Crediting meeting participants is facilitated by a collection of names.
+Crediting meeting participants is facilitated as well.
 
 ## How to install
 
-1. Enable developer mode for Google Chrome Extensions.
+1. Enable developer mode for Google Chrome Extensions. 
    See https://developer.chrome.com/extensions/faq#faq-dev-01
 
 2. Clone this repository to any location on your local computer.
