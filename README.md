@@ -28,5 +28,6 @@ Bare bones Google Chrome extension to copy Drupal meeting threads to the system 
    system clipboard and can be copied over to a Drupal meeting node for
    posterity.
 
-+1 Manually collect the usernames you intend to credit for participating
-   in the meeting and credit them when saving the meeting notes.
+While this is not automated (yet), you should manually collect the usernames
+you intend to credit for participating in the meeting and give drupal.org
+credits to them when saving the meeting notes.
