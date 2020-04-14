@@ -109,7 +109,7 @@ let scraper = {
 
 setTimeout(function() {
   let wrapper = document.createElement('div');
-  wrapper.setAttribute('style', "position:absolute;width:300px;height:30px;left:400px;z-index:10;" );
+  wrapper.setAttribute('style', "position:absolute;width:300px;height:30px;left:400px;z-index:1000;" );
   let style="width:90px;height:30px;margin-left:5px;margin-right:5px;background-color:#ccc;cursor:pointer;display:inline-block";
   let clearThread = document.createElement('button');
   clearThread.addEventListener('click', scraper.clear.bind(scraper));
