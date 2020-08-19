@@ -48,17 +48,17 @@ let scraper = {
     });
     let text = textNode.textContent;
 
-    text = text.replace(':zero:', '0️⃣ ');
-    text = text.replace(':one:', '1️⃣ ');
-    text = text.replace(':two:', '2️⃣ ');
-    text = text.replace(':three:', '3️⃣ ');
-    text = text.replace(':four:', '4️⃣ ');
-    text = text.replace(':five:', '5️⃣ ');
-    text = text.replace(':six:', '6️⃣ ');
-    text = text.replace(':seven:', '7️⃣ ');
-    text = text.replace(':eight:', '8️⃣ ');
-    text = text.replace(':nine:', '9️⃣ ');
-    text = text.replace(':keycap_ten:', '🔟 ');
+    text = text.replace(/:zero:/g, '0️⃣');
+    text = text.replace(/:one:/g, '1️⃣');
+    text = text.replace(/:two:/g, '2️⃣');
+    text = text.replace(/:three:/g, '3️⃣');
+    text = text.replace(/:four:/g, '4️⃣');
+    text = text.replace(/:five:/g, '5️⃣');
+    text = text.replace(/:six:/g, '6️⃣');
+    text = text.replace(/:seven:/g, '7️⃣');
+    text = text.replace(/:eight:/g, '8️⃣');
+    text = text.replace(/:nine:/g, '9️⃣');
+    text = text.replace(/:keycap_ten:/g, '🔟');
 
     let issues = /https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/
     return text.replace(issues, '[#$1]');
