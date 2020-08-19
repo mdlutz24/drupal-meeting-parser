@@ -96,7 +96,7 @@ let scraper = {
             if (nameMap.has(user)) {
               user = nameMap.get(user);
             }
-            
+
             this.users[user] = user;
             this.data += "<tr><td>" + user + "</td><td>" + parsedMessage + "</td></tr>\n";
           }
@@ -105,7 +105,7 @@ let scraper = {
     }, this)
     if (!finished) {
       sidebar.scrollTop += sidebar.offsetHeight;
-      setTimeout(this.parseThread.bind(this), 200);
+      setTimeout(this.parseThread.bind(this), 600);
     }
     else {
       this.endThread();
@@ -115,6 +115,11 @@ let scraper = {
   addThread: function () {
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     sidebar.scrollTop = 0;
+    setTimeout(this.addThreadHeader.bind(this), 600);
+  },
+
+  addThreadHeader: function() {
+    let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     let toppost = sidebar.querySelector('.c-virtual_list__item');
     this.ids.push(toppost.getAttribute('id'));
     this.ids.push(sidebar.querySelectorAll('.c-virtual_list__item')[1].getAttribute('id'));
