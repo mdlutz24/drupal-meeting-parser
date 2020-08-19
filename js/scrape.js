@@ -94,10 +94,13 @@ let scraper = {
             nameMap.set('hestenet (he/him)', 'hestenet');
 
             if (nameMap.has(user)) {
-              user = nameMap.get(user);
+              this.users[nameMap.get(user)] = nameMap.get(user);
+            }
+            else {
+              this.users[user] = user;
             }
 
-            this.users[user] = user;
+            // Keep the Slack name here so references to the names in messages are understandable.
             this.data += "<tr><td>" + user + "</td><td>" + parsedMessage + "</td></tr>\n";
           }
         }
