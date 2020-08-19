@@ -81,6 +81,22 @@ let scraper = {
           }
           else {
             let user = message.querySelector('a.c-message__sender_link').textContent;
+
+            // Map some common usernames for easier drupal.org name crediting.
+            let nameMap = new Map();
+            nameMap.set('kimb0', 'kim.pepper');
+            nameMap.set('mixologic', 'Mixologic');
+            nameMap.set('Gábor Hojtsy (he/him)', 'Gábor Hojtsy');
+            nameMap.set('Kristen Pol (she/her)', 'Kristen Pol');
+            nameMap.set('surabhi.gokte', 'Surabhi Gokte');
+            nameMap.set('wimleers (he/him)', 'Wim Leers');
+            nameMap.set('berdir', 'Berdir');
+            nameMap.set('hestenet (he/him)', 'hestenet');
+
+            if (nameMap.has(user)) {
+              user = nameMap.get(user);
+            }
+            
             this.users[user] = user;
             this.data += "<tr><td>" + user + "</td><td>" + parsedMessage + "</td></tr>\n";
           }
