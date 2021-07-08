@@ -3,11 +3,17 @@ let scraper = {
   ids: [],
   users: {},
   threadInProgress: false,
+  // null is undefined, false is don't save it, true is save it.
+  threadCredits: null,
+  lastTopId: null,
 
   clear: function () {
     this.data = '';
     this.ids = [];
     this.users = {};
+    this.threadInProgress = false;
+    this.threadCredits = null;
+    this.lastTopId = null;
     alert('Cleared thread memory. You can start fresh.');
   },
 
@@ -21,7 +27,17 @@ let scraper = {
   endThread: function() {
     if (this.isParsing()) {
       this.data += "</table>\n\n";
+      if (this.threadCredits === true) {
+        document.querySelector('#drupal-meeting-parser-add-with-credit-button').style.backgroundColor = 'yellow';
+        document.querySelector('#drupal-meeting-parser-add-with-credit-button').innerHTML = 'Add with credit';
+      }
+      else {
+        document.querySelector('#drupal-meeting-parser-add-without-credit-button').style.backgroundColor = 'yellow';
+        document.querySelector('#drupal-meeting-parser-add-without-credit-button').innerHTML = 'Add without credit';
+      }
       this.threadInProgress = false;
+      this.threadCredits = null;
+      this.lastTopId = null;
     }
   },
 
@@ -95,11 +111,13 @@ let scraper = {
             nameMap.set('berdir', 'Berdir');
             nameMap.set('hestenet (he/him)', 'hestenet');
 
-            if (nameMap.has(user)) {
-              this.users[nameMap.get(user)] = nameMap.get(user);
-            }
-            else {
-              this.users[user] = user;
+            if (this.threadCredits === true) {
+              if (nameMap.has(user)) {
+                this.users[nameMap.get(user)] = nameMap.get(user);
+              }
+              else {
+                this.users[user] = user;
+              }
             }
 
             // Keep the Slack name here so references to the names in messages are understandable.
@@ -122,9 +140,37 @@ let scraper = {
       alert('A thread is already being parsed to be added. Wait until it finishes. If it looks finished, you found a bug. Report at https://github.com/mdlutz24/drupal-meeting-parser/issues');
       return;
     }
+    if (this.threadCredits === null) {
+      // Initialize credit logging to true if not set otherwise.
+      this.threadCredits = true;
+      document.querySelector('#drupal-meeting-parser-add-with-credit-button').style.backgroundColor = 'gray';
+      document.querySelector('#drupal-meeting-parser-add-with-credit-button').innerHTML = '[Processing]';
+    }
+    else {
+      document.querySelector('#drupal-meeting-parser-add-without-credit-button').style.backgroundColor = 'gray';
+      document.querySelector('#drupal-meeting-parser-add-without-credit-button').innerHTML = '[Processing]';
+    }
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
+    this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
     sidebar.scrollTop = 0;
-    setTimeout(this.addThreadHeader.bind(this), 600);
+    setTimeout(this.ensureScrollToTop.bind(this), 600);
+  },
+
+  ensureScrollToTop: function() {
+    let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
+    if (this.lastTopId != sidebar.querySelector('.c-virtual_list__item').getAttribute('id')) {
+      this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
+      sidebar.scrollTop = 0;
+      setTimeout(this.ensureScrollToTop.bind(this), 600);
+    }
+    else {
+      this.addThreadHeader();
+    }
+  },
+
+  addThreadNoCredit: function () {
+    this.threadCredits = false;
+    this.addThread();
   },
 
   addThreadHeader: function() {
@@ -139,18 +185,27 @@ let scraper = {
 
 setTimeout(function() {
   let wrapper = document.createElement('div');
-  wrapper.setAttribute('style', "position:absolute;width:500px;height:30px;left:10px;top:3px;z-index:1000;text-align:center;" );
-  let style="width:100px;height:30px;margin-left:5px;margin-right:5px;background-color:yellow;cursor:pointer;display:inline-block;border-radius:4px;border: 1px solid black;box-shadow: 1px 1px #ddd;";
+  wrapper.setAttribute('id', 'drupal-meeting-parser-wrapper');
+  wrapper.setAttribute('style', "position:absolute;width:600px;height:30px;left:10px;top:3px;z-index:1000;text-align:center;" );
+  let style="width:140px;height:30px;margin-left:5px;margin-right:5px;background-color:yellow;cursor:pointer;display:inline-block;border-radius:4px;border: 1px solid black;box-shadow: 1px 1px #ddd;";
   let clearThread = document.createElement('button');
   clearThread.addEventListener('click', scraper.clear.bind(scraper));
   clearThread.setAttribute('style', style);
   clearThread.setAttribute('value', 'Clear memory');
+  clearThread.setAttribute('id', 'drupal-meeting-parser-clear-button');
   clearThread.appendChild(document.createTextNode('Clear memory'));
   let addThread = document.createElement('button');
   addThread.addEventListener('click', scraper.addThread.bind(scraper));
   addThread.setAttribute('style', style);
-  addThread.setAttribute('value', 'Add thread');
-  addThread.appendChild(document.createTextNode('Add thread'));
+  addThread.setAttribute('value', 'Add with credit');
+  addThread.setAttribute('id', 'drupal-meeting-parser-add-with-credit-button');
+  addThread.appendChild(document.createTextNode('Add with credit'));
+  let addThreadNoCredit = document.createElement('button');
+  addThreadNoCredit.addEventListener('click', scraper.addThreadNoCredit.bind(scraper));
+  addThreadNoCredit.setAttribute('style', style);
+  addThreadNoCredit.setAttribute('value', 'Add without credit');
+  addThreadNoCredit.appendChild(document.createTextNode('Add without credit'));
+  addThreadNoCredit.setAttribute('id', 'drupal-meeting-parser-add-without-credit-button');
   let displayThread = document.createElement('button');
   displayThread.addEventListener('click', scraper.display.bind(scraper));
   displayThread.setAttribute('style', style);
@@ -158,6 +213,7 @@ setTimeout(function() {
   displayThread.appendChild(document.createTextNode('To clipboard'));
   wrapper.appendChild(clearThread);
   wrapper.appendChild(addThread);
+  wrapper.appendChild(addThreadNoCredit);
   wrapper.appendChild(displayThread);
 
   let body = document.querySelector('body');
