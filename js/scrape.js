@@ -8,6 +8,7 @@ let scraper = {
     this.data = '';
     this.ids = [];
     this.users = {};
+    alert('Cleared thread memory. You can start fresh.');
   },
 
   startThread: function() {
@@ -36,6 +37,7 @@ let scraper = {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
+    alert('Thread memory copied to clipboard. Use the participant list to credit individuals.');
   },
 
   parseText: function(textNode) {
@@ -69,7 +71,7 @@ let scraper = {
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     let finished = (sidebar.scrollTop + sidebar.offsetHeight) >= sidebar.scrollHeight;
     sidebar.querySelectorAll('.c-virtual_list__item').forEach(function(message) {
-      if (!this.ids.includes(message.getAttribute('id')) && !message.getAttribute('id').endsWith('list_input')) {
+      if (!this.ids.includes(message.getAttribute('id')) && !message.getAttribute('id').endsWith('_input')) {
         this.ids.push(message.getAttribute('id'));
         if (typeof(message.querySelector('a.c-message__sender_link')) !== 'undefined') {
           let parsedMessage = this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4]).trim();
@@ -116,6 +118,10 @@ let scraper = {
   },
 
   addThread: function () {
+    if (this.isParsing()) {
+      alert('A thread is already being parsed to be added. Wait until it finishes. If it looks finished, you found a bug. Report at https://github.com/mdlutz24/drupal-meeting-parser/issues');
+      return;
+    }
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     sidebar.scrollTop = 0;
     setTimeout(this.addThreadHeader.bind(this), 600);
