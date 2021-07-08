@@ -139,23 +139,23 @@ let scraper = {
 
 setTimeout(function() {
   let wrapper = document.createElement('div');
-  wrapper.setAttribute('style', "position:absolute;width:300px;height:30px;left:400px;z-index:1000;" );
-  let style="width:90px;height:30px;margin-left:5px;margin-right:5px;background-color:#ccc;cursor:pointer;display:inline-block";
+  wrapper.setAttribute('style', "position:absolute;width:500px;height:30px;left:10px;top:3px;z-index:1000;text-align:center;" );
+  let style="width:100px;height:30px;margin-left:5px;margin-right:5px;background-color:yellow;cursor:pointer;display:inline-block;border-radius:4px;border: 1px solid black;box-shadow: 1px 1px #ddd;";
   let clearThread = document.createElement('button');
   clearThread.addEventListener('click', scraper.clear.bind(scraper));
   clearThread.setAttribute('style', style);
-  clearThread.setAttribute('value', 'Clear');
-  clearThread.appendChild(document.createTextNode('Clear'));
+  clearThread.setAttribute('value', 'Clear memory');
+  clearThread.appendChild(document.createTextNode('Clear memory'));
   let addThread = document.createElement('button');
   addThread.addEventListener('click', scraper.addThread.bind(scraper));
   addThread.setAttribute('style', style);
-  addThread.setAttribute('value', 'Add Thread');
-  addThread.appendChild(document.createTextNode('Add Thread'));
+  addThread.setAttribute('value', 'Add thread');
+  addThread.appendChild(document.createTextNode('Add thread'));
   let displayThread = document.createElement('button');
   displayThread.addEventListener('click', scraper.display.bind(scraper));
   displayThread.setAttribute('style', style);
-  displayThread.setAttribute('value', 'copy');
-  displayThread.appendChild(document.createTextNode('Copy'));
+  displayThread.setAttribute('value', 'To clipboard');
+  displayThread.appendChild(document.createTextNode('To clipboard'));
   wrapper.appendChild(clearThread);
   wrapper.appendChild(addThread);
   wrapper.appendChild(displayThread);
