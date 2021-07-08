@@ -21,8 +21,9 @@ Crediting meeting participants is facilitated as well.
 4. A grayed out Drupal meeting parser icon will appear in your browser alongside
    the URL bar.
 
-4. Open the chatroom in Google Chrome. The icon will become blue and three
-   flat gray buttons should apear on the top of the page: Clear, Add Thread and Copy.
+4. Open the chatroom in Google Chrome. The icon will become blue and four
+   bright yellow buttons should apear on the top of the page: Clear memory, 
+   Add with credit, Add without credit and To clipboard.
 
 ## When to use
 
@@ -34,32 +35,39 @@ everybody had a chance to chime in.
 ## How to use
 
 The extension has internal storage for all your added threads. You can
-clear the internal storage with 'Clear', add a thread to it with 'Add Thread'
-and copy the contents of that storage (all the threads you added in the order
-you added them) to the operating system's clipboard with the 'Copy' button.
+clear the internal storage with 'Clear memory', add a thread to it with 
+'Add with credits' or 'Add without credits' and copy the contents of that
+storage (all the threads you added in the order you added them) to the
+operating system's clipboard with the 'To clipboard' button.
 
 1. Open each thread in the chat sidebar you want to add to the meeting notes.
-   Click 'Add Thread' once the thread loaded. Repeat this for all threads
-   you want to add to the notes.
+   Click one of the 'Add' buttons once the sidebar appears. Repeat this for all
+   threads you want to add to the notes. The script should scroll to the top
+   of the thread first to autoload all items and then scroll to the bottom
+   of the thread too until it loads all items from there as well.
 
-2. When done, click 'Copy'. Now your meeting notes are on the operating
+2. When done, click 'To clipboard'. Now your meeting notes are on the operating
    system clipboard and can be pasted into the Drupal meeting node for
    posterity.
 
 3. At the end of the paste, you will find a 'Participants' section. This
-   includes all the chat usernames of participants. It is a best practice to
-   credit active meeting participants on the meeting notes issue. You can do
-   that by pasting the list of participants at the end of your drupal.org
-   meeting issue in the 'Credit others' textfield (in the 'Crediting &
-   committing' fieldset). This field is only visible for maintainers of a
-   project. If you are not a maintainer, ask a maintainer to credit people.
+   includes chat usernames of participants for threads you added 'with credit'.
+   It is a best practice to credit active meeting participants on the meeting
+   notes issue. You can do that by pasting the list of participants at the end
+   of your drupal.org meeting issue in the 'Credit others' textfield (in the
+   'Crediting & committing' fieldset). This field is only visible for maintainers
+   of a project. If you are not a maintainer, ask a maintainer to credit people.
 
    Do keep in mind two things. First of all, it is a best practice to only
    credit active meeting participants. That is people who actually contributed
-   to the meeting. Second, drupal.org usernames will not always be the same as
-   chat usernames. When you save credits after you pasted the list, check which
-   users got credits and find and add the actual drupal.org usernames for the
-   missing participants to credit. Then save them with another comment.
+   to the meeting. You can use the 'Add without credit' button for introductory or
+   off-topic threads you want to save without credits assigned. Second, drupal.org
+   usernames will not always be the same as chat usernames. When you save credits
+   after you pasted the list, check which users got credits and find and add the
+   actual drupal.org usernames for the missing participants to credit. Then save
+   them with another comment. Some common user name mappings are included with the
+   script. We can add more, please submit them as issues at
+   https://github.com/mdlutz24/drupal-meeting-parser/issues.
 
    Finally, don't forget to close the issue as fixed so the credits will be
    granted.
