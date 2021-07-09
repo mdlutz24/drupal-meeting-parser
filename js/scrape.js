@@ -6,6 +6,7 @@ let scraper = {
   // null is undefined, false is don't save it, true is save it.
   threadCredits: null,
   lastTopId: null,
+  threadCount: 0,
 
   clear: function () {
     this.data = '';
@@ -14,6 +15,7 @@ let scraper = {
     this.threadInProgress = false;
     this.threadCredits = null;
     this.lastTopId = null;
+    this.threadCount = 0;
     alert('Cleared thread memory. You can start fresh.');
   },
 
@@ -38,6 +40,15 @@ let scraper = {
       this.threadInProgress = false;
       this.threadCredits = null;
       this.lastTopId = null;
+
+      // Increase and display thread count on clipboard button. Make it yellow
+      // in case this was the first thread.
+      this.threadCount++;
+      document.querySelector('#drupal-meeting-parser-clipboard-button').innerHTML = 'Copy ' + (this.threadCount > 1 ? this.threadCount + ' threads' : 'thread') + ' to clipboard';
+      document.querySelector('#drupal-meeting-parser-clipboard-button').style.backgroundColor = 'yellow';
+
+      // The main slack window has an ARIA-expanded item of this thread, so add a checkmark there to help identify which one was saved.
+      document.querySelector('div.c-virtual_list__item[aria-expanded="true"] .p-rich_text_section').prepend('✅ ');
     }
   },
 
@@ -136,10 +147,23 @@ let scraper = {
   },
 
   addThread: function () {
+    // Don't let another thread start before this thread finishes.
     if (this.isParsing()) {
       alert('A thread is already being parsed to be added. Wait until it finishes. If it looks finished, you found a bug. Report at https://github.com/mdlutz24/drupal-meeting-parser/issues');
       return;
     }
+
+    // Check if the current top ID is already in the parsed IDs. It may not be
+    // the absolute top ID yet, but is this thread was recorded, this ID should
+    // also already be parsed.
+    let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
+    this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
+    if (this.ids.includes(this.lastTopId)) {
+      alert('This thread was already added. Pick another thread to add.');
+      return;
+    }
+
+    // Provide feedback on the button that parsing is happening.
     if (this.threadCredits === null) {
       // Initialize credit logging to true if not set otherwise.
       this.threadCredits = true;
@@ -150,13 +174,14 @@ let scraper = {
       document.querySelector('#drupal-meeting-parser-add-without-credit-button').style.backgroundColor = 'gray';
       document.querySelector('#drupal-meeting-parser-add-without-credit-button').innerHTML = '[Processing]';
     }
-    let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
-    this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
     sidebar.scrollTop = 0;
     setTimeout(this.ensureScrollToTop.bind(this), 600);
   },
 
   ensureScrollToTop: function() {
+    // Slack loads the bottom of threads by default. We should scroll to the top enough
+    // times to dynamically load all items in the thread and reach the starting message
+    // of the thread.
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     if (this.lastTopId != sidebar.querySelector('.c-virtual_list__item').getAttribute('id')) {
       this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
@@ -169,6 +194,8 @@ let scraper = {
   },
 
   addThreadNoCredit: function () {
+    // Initialize global flag to not record credits and fall back on default
+    // thread behavior otherwise.
     this.threadCredits = false;
     this.addThread();
   },
@@ -186,8 +213,8 @@ let scraper = {
 setTimeout(function() {
   let wrapper = document.createElement('div');
   wrapper.setAttribute('id', 'drupal-meeting-parser-wrapper');
-  wrapper.setAttribute('style', "position:absolute;width:600px;height:30px;left:10px;top:3px;z-index:1000;text-align:center;" );
-  let style="width:140px;height:30px;margin-left:5px;margin-right:5px;background-color:yellow;cursor:pointer;display:inline-block;border-radius:4px;border: 1px solid black;box-shadow: 1px 1px #ddd;";
+  wrapper.setAttribute('style', "position:absolute;width:800px;height:30px;left:10px;top:3px;z-index:1000;text-align:center;" );
+  let style="width:180px;height:30px;margin-left:5px;margin-right:5px;background-color:yellow;cursor:pointer;display:inline-block;border-radius:4px;border: 1px solid black;box-shadow: 1px 1px #ddd;";
   let clearThread = document.createElement('button');
   clearThread.addEventListener('click', scraper.clear.bind(scraper));
   clearThread.setAttribute('style', style);
@@ -208,9 +235,10 @@ setTimeout(function() {
   addThreadNoCredit.setAttribute('id', 'drupal-meeting-parser-add-without-credit-button');
   let displayThread = document.createElement('button');
   displayThread.addEventListener('click', scraper.display.bind(scraper));
-  displayThread.setAttribute('style', style);
-  displayThread.setAttribute('value', 'To clipboard');
-  displayThread.appendChild(document.createTextNode('To clipboard'));
+  displayThread.setAttribute('style', style + 'background-color:gray;');
+  displayThread.setAttribute('value', 'Copy to clipboard');
+  displayThread.setAttribute('id', 'drupal-meeting-parser-clipboard-button');
+  displayThread.appendChild(document.createTextNode('Copy to clipboard'));
   wrapper.appendChild(clearThread);
   wrapper.appendChild(addThread);
   wrapper.appendChild(addThreadNoCredit);
