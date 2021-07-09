@@ -16,6 +16,9 @@ let scraper = {
     this.threadCredits = null;
     this.lastTopId = null;
     this.threadCount = 0;
+    let button = document.querySelector('#drupal-meeting-parser-clipboard-button');
+    button.innerHTML = 'Copy to clipboard';
+    button.style.backgroundColor = 'gray';
     alert('Cleared thread memory. You can start fresh.');
   },
 
@@ -30,12 +33,14 @@ let scraper = {
     if (this.isParsing()) {
       this.data += "</table>\n\n";
       if (this.threadCredits === true) {
-        document.querySelector('#drupal-meeting-parser-add-with-credit-button').style.backgroundColor = 'yellow';
-        document.querySelector('#drupal-meeting-parser-add-with-credit-button').innerHTML = 'Add with credit';
+        let button = document.querySelector('#drupal-meeting-parser-add-with-credit-button');
+        button.innerHTML = 'Add with credit';
+        button.style.backgroundColor = 'yellow';
       }
       else {
-        document.querySelector('#drupal-meeting-parser-add-without-credit-button').style.backgroundColor = 'yellow';
-        document.querySelector('#drupal-meeting-parser-add-without-credit-button').innerHTML = 'Add without credit';
+        let button = document.querySelector('#drupal-meeting-parser-add-without-credit-button');
+        button.innerHTML = 'Add without credit';
+        button.style.backgroundColor = 'yellow';
       }
       this.threadInProgress = false;
       this.threadCredits = null;
@@ -44,8 +49,9 @@ let scraper = {
       // Increase and display thread count on clipboard button. Make it yellow
       // in case this was the first thread.
       this.threadCount++;
-      document.querySelector('#drupal-meeting-parser-clipboard-button').innerHTML = 'Copy ' + (this.threadCount > 1 ? this.threadCount + ' threads' : 'thread') + ' to clipboard';
-      document.querySelector('#drupal-meeting-parser-clipboard-button').style.backgroundColor = 'yellow';
+      let button = document.querySelector('#drupal-meeting-parser-clipboard-button');
+      button.innerHTML = 'Copy ' + (this.threadCount > 1 ? this.threadCount + ' threads' : 'thread') + ' to clipboard';
+      button.style.backgroundColor = 'yellow';
 
       // The main slack window has an ARIA-expanded item of this thread, so add a checkmark there to help identify which one was saved.
       document.querySelector('div.c-virtual_list__item[aria-expanded="true"] .p-rich_text_section').prepend('✅ ');
@@ -167,12 +173,14 @@ let scraper = {
     if (this.threadCredits === null) {
       // Initialize credit logging to true if not set otherwise.
       this.threadCredits = true;
-      document.querySelector('#drupal-meeting-parser-add-with-credit-button').style.backgroundColor = 'gray';
-      document.querySelector('#drupal-meeting-parser-add-with-credit-button').innerHTML = '[Processing]';
+      let button = document.querySelector('#drupal-meeting-parser-add-with-credit-button');
+      button.style.backgroundColor = 'gray';
+      button.innerHTML = '[Processing]';
     }
     else {
-      document.querySelector('#drupal-meeting-parser-add-without-credit-button').style.backgroundColor = 'gray';
-      document.querySelector('#drupal-meeting-parser-add-without-credit-button').innerHTML = '[Processing]';
+      let button = document.querySelector('#drupal-meeting-parser-add-without-credit-button');
+      button.style.backgroundColor = 'gray';
+      button.innerHTML = '[Processing]';
     }
     sidebar.scrollTop = 0;
     setTimeout(this.ensureScrollToTop.bind(this), 600);
