@@ -38,7 +38,7 @@ The extension has internal storage for all your added threads. You can
 clear the internal storage with 'Clear memory', add a thread to it with 
 'Add with credits' or 'Add without credits' and copy the contents of that
 storage (all the threads you added in the order you added them) to the
-operating system's clipboard with the 'To clipboard' button.
+operating system's clipboard with the 'Copy to clipboard' button.
 
 1. Open each thread in the chat sidebar you want to add to the meeting notes.
    Click one of the 'Add' buttons once the sidebar appears. Repeat this for all
@@ -46,9 +46,9 @@ operating system's clipboard with the 'To clipboard' button.
    of the thread first to autoload all items and then scroll to the bottom
    of the thread too until it loads all items from there as well.
 
-2. When done, click 'To clipboard'. Now your meeting notes are on the operating
-   system clipboard and can be pasted into the Drupal meeting node for
-   posterity.
+2. When done, click 'Copy X threads to clipboard'. Now your meeting notes are
+   on the operating system clipboard and can be pasted into the Drupal meeting
+   node for posterity.
 
 3. At the end of the paste, you will find a 'Participants' section. This
    includes chat usernames of participants for threads you added 'with credit'.
