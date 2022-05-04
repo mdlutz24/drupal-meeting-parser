@@ -53,8 +53,8 @@ let scraper = {
       button.innerHTML = 'Copy ' + (this.threadCount > 1 ? this.threadCount + ' threads' : 'thread') + ' to clipboard';
       button.style.backgroundColor = 'yellow';
 
-      // The main slack window has an ARIA-expanded item of this thread, so add a checkmark there to help identify which one was saved.
-      document.querySelector('div.c-virtual_list__item[aria-expanded="true"] .p-rich_text_section').prepend('✅ ');
+      // The main slack window has the list item of this thread, so add a checkmark there to help identify which one was saved.
+      document.querySelector('div.c-virtual_list__item[tabindex="0"] .p-rich_text_section').prepend('✅ ');
     }
   },
 
