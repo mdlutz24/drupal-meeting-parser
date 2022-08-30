@@ -97,6 +97,8 @@ let scraper = {
     text = text.replace(/:keycap_ten:/g, '🔟');
 
     // Other emoji mapping.
+    text = text.replace(/:no_entry_sign:/g, '🚫');
+    text = text.replace(/:bust_in_silhouette:/g, '👤');
     text = text.replace(/:star:/g, '⭐');
     text = text.replace(/:heart:/g, '❤️');
     text = text.replace(/:blue_heart:/g, '💙');
