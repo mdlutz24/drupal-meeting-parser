@@ -118,7 +118,7 @@ let scraper = {
             this.data += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
           }
           else {
-            let user = message.querySelector('a.c-message__sender_link').textContent;
+            let user = message.querySelector('button.c-message__sender_button').textContent;
 
             // Map some common usernames for easier drupal.org name crediting.
             let nameMap = new Map();
