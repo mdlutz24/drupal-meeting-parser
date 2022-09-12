@@ -120,10 +120,10 @@ let scraper = {
         this.ids.push(message.getAttribute('id'));
         if (typeof(message.querySelector('a.c-message__sender_link')) !== 'undefined') {
           let parsedMessage = this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4]).trim();
-          if (parsedMessage.startsWith(":bust_in_silhouette:")) {
-            this.data += "<tr><td>(<em>anonymous</em>)</td><td>" + parsedMessage.replace(":bust_in_silhouette:", '').trim() + "</td></tr>\n";
+          if (parsedMessage.startsWith("👤")) {
+            this.data += "<tr><td>(<em>anonymous</em>)</td><td>" + parsedMessage.replace("👤", '').trim() + "</td></tr>\n";
           }
-          else if (parsedMessage.startsWith(":no_entry_sign:")) {
+          else if (parsedMessage.startsWith("🚫")) {
             this.data += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
           }
           else {
