@@ -86,6 +86,7 @@ let scraper = {
     });
     let text = textNode.textContent;
 
+    // Meeting agenda emoji mapping.
     text = text.replace(/:zero:/g, '0️⃣');
     text = text.replace(/:one:/g, '1️⃣');
     text = text.replace(/:two:/g, '2️⃣');
@@ -97,6 +98,17 @@ let scraper = {
     text = text.replace(/:eight:/g, '8️⃣');
     text = text.replace(/:nine:/g, '9️⃣');
     text = text.replace(/:keycap_ten:/g, '🔟');
+
+    // Other emoji mapping.
+    text = text.replace(/:no_entry_sign:/g, '🚫');
+    text = text.replace(/:bust_in_silhouette:/g, '👤');
+    text = text.replace(/:star:/g, '⭐');
+    text = text.replace(/:heart:/g, '❤️');
+    text = text.replace(/:blue_heart:/g, '💙');
+    text = text.replace(/:mega:/g, '📣');
+    text = text.replace(/:slightly_smiling_face:/g, '🙂');
+    text = text.replace(/:raising_hand:/g, '🙋');
+    text = text.replace(/:thumbsup:/g, '👍');
 
     let issues = /https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/
     return text.replace(issues, '[#$1]');
@@ -111,10 +123,10 @@ let scraper = {
         this.ids.push(message.getAttribute('id'));
         if (typeof(message.querySelector('a.c-message__sender_link')) !== 'undefined') {
           let parsedMessage = this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4]).trim();
-          if (parsedMessage.startsWith(":bust_in_silhouette:")) {
-            this.data += "<tr><td>(<em>anonymous</em>)</td><td>" + parsedMessage.replace(":bust_in_silhouette:", '').trim() + "</td></tr>\n";
+          if (parsedMessage.startsWith("👤")) {
+            this.data += "<tr><td>(<em>anonymous</em>)</td><td>" + parsedMessage.replace("👤", '').trim() + "</td></tr>\n";
           }
-          else if (parsedMessage.startsWith(":no_entry_sign:")) {
+          else if (parsedMessage.startsWith("🚫")) {
             this.data += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
           }
           else {
