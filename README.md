@@ -1,5 +1,5 @@
 # drupal-meeting-parser
-This is a bare bones Google Chrome extension to copy Drupal meeting threads to the system clipboard.
+This is a bare bones Google Chrome extension to copy Drupal Slack meeting threads to the system clipboard.
 
 <img src="https://github.com/mdlutz24/drupal-meeting-parser/blob/master/icon.png" alt="Drupal Meeting Parser icon" align="right" />
 
