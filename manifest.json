@@ -2,7 +2,7 @@
   "name": "Drupal Meeting Parser",
   "version": "1.0",
   "description": "Parses Drupal meeting threads for public archiving",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "icons": {
     "128": "icon.png"
   },
