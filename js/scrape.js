@@ -130,6 +130,10 @@ let scraper = {
             nameMap.set('wimleers (he/him)', 'Wim Leers');
             nameMap.set('berdir', 'Berdir');
             nameMap.set('hestenet (he/him)', 'hestenet');
+            nameMap.set('timplunkett (he/him)', 'tim.plunkett');
+            nameMap.set('AmyJune (volkswagenchick she/her)', 'volkswagenchick');
+            nameMap.set('phenaproxima (he/him)', 'phenaproxima');
+            nameMap.set('Piotr Koszuliński', 'Reinmar');
 
             if (this.threadCredits === true) {
               if (nameMap.has(user)) {
