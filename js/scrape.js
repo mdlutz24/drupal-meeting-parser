@@ -88,7 +88,7 @@ let scraper = {
     links.forEach(function(link) {
       // Turn links into pseudo-HTML, but avoid member mentions.
       let href = link.getAttribute('href');
-      if (href != link.textContent && href.indexOf('drupal.slack.com') == -1) {
+      if (href !== link.textContent && href.indexOf('drupal.slack.com') === -1) {
         link.outerHTML = '{{a href="' + href + '"}}' + link.textContent + '{{/a}}';
       }
     });
@@ -123,9 +123,8 @@ let scraper = {
     text = text.replace(issues, '[#$1]');
 
     // Convert pseudo-links to actual HTML links.
-    text = text.replace('{{a href', '<a href');
-    text = text.replace('"}}', '">');
-    text = text.replace('{{/a}}', '</a>');
+    let linkRegex = /\{\{a href="(.*?)"}}(.*?)\{\{\/a}}/g
+    text = text.replaceAll(linkRegex, '<a href="$1">$2<\/a>')
 
     return text;
   },
