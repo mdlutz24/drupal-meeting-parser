@@ -251,7 +251,7 @@ let scraper = {
     // times to dynamically load all items in the thread and reach the starting message
     // of the thread.
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
-    if (this.lastTopId != sidebar.querySelector('.c-virtual_list__item').getAttribute('id')) {
+    if (this.lastTopId !== sidebar.querySelector('.c-virtual_list__item').getAttribute('id')) {
       this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
       sidebar.scrollTop = 0;
       setTimeout(this.ensureScrollToTop.bind(this), 600);
