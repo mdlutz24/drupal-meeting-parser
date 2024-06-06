@@ -117,7 +117,7 @@ let scraper = {
   parseThread: function() {
     this.startThread();
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
-    let finished = (sidebar.scrollTop + sidebar.offsetHeight) >= sidebar.scrollHeight;
+    let finished = Math.ceil(sidebar.scrollTop + sidebar.offsetHeight) >= sidebar.scrollHeight;
     sidebar.querySelectorAll('.c-virtual_list__item').forEach(function(message) {
       if (!this.ids.includes(message.getAttribute('id')) && !message.getAttribute('id').endsWith('_input')) {
         this.ids.push(message.getAttribute('id'));
