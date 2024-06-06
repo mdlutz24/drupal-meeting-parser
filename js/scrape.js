@@ -16,6 +16,10 @@ let scraper = {
     this.threadCredits = null;
     this.lastTopId = null;
     this.threadCount = 0;
+    document.querySelectorAll('span.drupal-meeting-parser-copied').forEach(
+      function(span) {
+        span.remove()
+      });
     let button = document.querySelector('#drupal-meeting-parser-clipboard-button');
     button.innerHTML = 'Copy to clipboard';
     button.style.backgroundColor = 'gray';
@@ -57,7 +61,10 @@ let scraper = {
       button.style.color = 'black';
 
       // The main slack window has the list item of this thread, so add a checkmark there to help identify which one was saved.
-      document.querySelector('div.c-virtual_list__item[tabindex="0"] .p-rich_text_section').prepend('✅ ');
+      let span = document.createElement('span');
+      span.setAttribute('class', 'drupal-meeting-parser-copied');
+      span.textContent = '✅ ';
+      document.querySelector('div.c-virtual_list__item[tabindex="0"] .p-rich_text_section').prepend(span);
     }
   },
 
