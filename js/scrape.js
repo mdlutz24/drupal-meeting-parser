@@ -148,6 +148,10 @@ let scraper = {
             nameMap.set('Piotr Koszuliński', 'Reinmar');
             nameMap.set('Björn Brala (bbrala)', 'bbrala');
             nameMap.set('lleber', 'Luke.Leber');
+            nameMap.set('mikelutz (he/him)', 'mikelutz');
+            nameMap.set('greg-boggs', 'Greg Boggs');
+            nameMap.set('Dan Davis', 'ddavisboxleitner');
+            nameMap.set('Stephanie', 'pixlkat');
 
             if (this.threadCredits === true) {
               if (nameMap.has(user)) {
