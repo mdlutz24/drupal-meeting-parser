@@ -3,6 +3,7 @@ let scraper = {
   ids: [],
   users: {},
   threadInProgress: false,
+  relatedIssues: {},
   // null is undefined, false is don't save it, true is save it.
   threadCredits: null,
   lastTopId: null,
@@ -76,6 +77,7 @@ let scraper = {
     const el = document.createElement('textarea');
     el.value = this.data;
     el.value += "\n\nParticipants:\n\n" + Object.keys(this.users).join(', ');
+    el.value += "\n\nRelated Issues\n\n" + Object.keys(this.relatedIssues).join(', ');
     document.body.appendChild(el);
     el.select();
     document.execCommand('copy');
@@ -126,8 +128,17 @@ let scraper = {
     text = text.replace(/:thumbsup:/g, '👍');
 
     // Avoid matching issue links in pseudo-HTML, so we don't get double links.
-    let issues = /[^}"]https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/;
-    text = text.replace(issues, '[#$1]');
+    let issuesRegex = /[^}"]https:\/\/www\.drupal\.org\/project\/[a-z_]+\/issues\/([0-9]{4,8})/g
+    // Don't add the meeting issue to related issues.
+    if (text.match(/Has a public agenda anyone can add to: /) === null) {
+      let issues = [...text.matchAll(issuesRegex)];
+      let self = this;
+      issues.forEach(function (value) {
+        self.relatedIssues['#' + value[1]] = value[1];
+      })
+    }
+
+    text = text.replaceAll(issuesRegex, '[#$1]');
 
     // Convert pseudo-links to actual HTML links.
     let linkRegex = /\{\{a href="(.*?)"}}(.*?)\{\{\/a}}/g
