@@ -74,15 +74,12 @@ let scraper = {
   },
 
   display: function () {
-    const el = document.createElement('textarea');
-    el.value = this.data;
-    el.value += "\n\nParticipants:\n\n" + Object.keys(this.users).join(', ');
-    el.value += "\n\nRelated Issues\n\n" + Object.keys(this.relatedIssues).join(', ');
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    alert('Thread memory copied to clipboard. Use the participant list to credit individuals.');
+    let output = this.data;
+    output += "\n\nParticipants:\n\n" + Object.keys(this.users).join(', ');
+    output += "\n\nRelated Issues:\n\n" + Object.keys(this.relatedIssues).join(', ');
+    navigator.clipboard.writeText(output).then(function() {
+      alert('Thread memory copied to clipboard. Use the participant list to credit individuals.');
+    });
   },
 
   parseText: function(textNode) {
