@@ -84,6 +84,14 @@ let scraper = {
         image.outerHTML = image.getAttribute('data-stringify-emoji');
       }
     });
+    let links = textNode.querySelectorAll("a");
+    links.forEach(function(link) {
+      // Turn links into pseudo-HTML, but avoid member mentions.
+      let href = link.getAttribute('href');
+      if (href !== link.textContent && href.indexOf('drupal.slack.com') === -1) {
+        link.outerHTML = '{{a href="' + href + '"}}' + link.textContent + '{{/a}}';
+      }
+    });
     let text = textNode.textContent;
 
     // Meeting agenda emoji mapping.
@@ -110,8 +118,15 @@ let scraper = {
     text = text.replace(/:raising_hand:/g, '🙋');
     text = text.replace(/:thumbsup:/g, '👍');
 
-    let issues = /https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/
-    return text.replace(issues, '[#$1]');
+    // Avoid matching issue links in pseudo-HTML, so we don't get double links.
+    let issues = /[^}"]https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/;
+    text = text.replace(issues, '[#$1]');
+
+    // Convert pseudo-links to actual HTML links.
+    let linkRegex = /\{\{a href="(.*?)"}}(.*?)\{\{\/a}}/g
+    text = text.replaceAll(linkRegex, '<a href="$1">$2<\/a>')
+
+    return text;
   },
 
   parseThread: function() {
