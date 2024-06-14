@@ -3,6 +3,7 @@ let scraper = {
   ids: [],
   users: {},
   threadInProgress: false,
+  relatedIssues: {},
   // null is undefined, false is don't save it, true is save it.
   threadCredits: null,
   lastTopId: null,
@@ -16,6 +17,10 @@ let scraper = {
     this.threadCredits = null;
     this.lastTopId = null;
     this.threadCount = 0;
+    document.querySelectorAll('span.drupal-meeting-parser-copied').forEach(
+      function(span) {
+        span.remove()
+      });
     let button = document.querySelector('#drupal-meeting-parser-clipboard-button');
     button.innerHTML = 'Copy to clipboard';
     button.style.backgroundColor = 'gray';
@@ -57,7 +62,10 @@ let scraper = {
       button.style.color = 'black';
 
       // The main slack window has the list item of this thread, so add a checkmark there to help identify which one was saved.
-      document.querySelector('div.c-virtual_list__item[tabindex="0"] .p-rich_text_section').prepend('✅ ');
+      let span = document.createElement('span');
+      span.setAttribute('class', 'drupal-meeting-parser-copied');
+      span.textContent = '✅ ';
+      document.querySelector('div.c-virtual_list__item[tabindex="0"] .p-rich_text_section').prepend(span);
     }
   },
 
@@ -66,14 +74,12 @@ let scraper = {
   },
 
   display: function () {
-    const el = document.createElement('textarea');
-    el.value = this.data;
-    el.value += "\n\nParticipants:\n\n" + Object.keys(this.users).join(', ');
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    alert('Thread memory copied to clipboard. Use the participant list to credit individuals.');
+    let output = this.data;
+    output += "\n\nParticipants:\n\n" + Object.keys(this.users).join(', ');
+    output += "\n\nRelated Issues:\n\n" + Object.keys(this.relatedIssues).join(', ');
+    navigator.clipboard.writeText(output).then(function() {
+      alert('Thread memory copied to clipboard. Use the participant list to credit individuals.');
+    });
   },
 
   parseText: function(textNode) {
@@ -119,8 +125,17 @@ let scraper = {
     text = text.replace(/:thumbsup:/g, '👍');
 
     // Avoid matching issue links in pseudo-HTML, so we don't get double links.
-    let issues = /[^}"]https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/;
-    text = text.replace(issues, '[#$1]');
+    let issuesRegex = /[^}"]https:\/\/www\.drupal\.org\/project\/[a-z_]+\/issues\/([0-9]{4,8})/g
+    // Don't add the meeting issue to related issues.
+    if (text.match(/Has a public agenda anyone can add to: /) === null) {
+      let issues = [...text.matchAll(issuesRegex)];
+      let self = this;
+      issues.forEach(function (value) {
+        self.relatedIssues['#' + value[1]] = value[1];
+      })
+    }
+
+    text = text.replaceAll(issuesRegex, '[#$1]');
 
     // Convert pseudo-links to actual HTML links.
     let linkRegex = /\{\{a href="(.*?)"}}(.*?)\{\{\/a}}/g
@@ -167,6 +182,7 @@ let scraper = {
             nameMap.set('greg-boggs', 'Greg Boggs');
             nameMap.set('Dan Davis', 'ddavisboxleitner');
             nameMap.set('Stephanie', 'pixlkat');
+            nameMap.set('Fathima Asmat', 'fathima.asmat')
 
             if (this.threadCredits === true) {
               if (nameMap.has(user)) {
@@ -233,7 +249,7 @@ let scraper = {
     // times to dynamically load all items in the thread and reach the starting message
     // of the thread.
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
-    if (this.lastTopId != sidebar.querySelector('.c-virtual_list__item').getAttribute('id')) {
+    if (this.lastTopId !== sidebar.querySelector('.c-virtual_list__item').getAttribute('id')) {
       this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
       sidebar.scrollTop = 0;
       setTimeout(this.ensureScrollToTop.bind(this), 600);
