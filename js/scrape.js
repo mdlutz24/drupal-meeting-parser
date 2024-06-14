@@ -182,6 +182,7 @@ let scraper = {
             nameMap.set('greg-boggs', 'Greg Boggs');
             nameMap.set('Dan Davis', 'ddavisboxleitner');
             nameMap.set('Stephanie', 'pixlkat');
+            nameMap.set('Fathima Asmat', 'fathima.asmat')
 
             if (this.threadCredits === true) {
               if (nameMap.has(user)) {
