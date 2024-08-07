@@ -77,8 +77,9 @@ let scraper = {
   },
 
   parseText: function(textNode) {
-    textNode = textNode.cloneNode(true);
-    let images = textNode.querySelectorAll("img");
+    copyNode = document.createElement('div');
+    copyNode.innerHTML = textNode.innerHTML;
+    let images = copyNode.querySelectorAll("img");
     images.forEach(function(image) {
       if (image.getAttribute('data-stringify-type') === 'emoji') {
         image.outerHTML = image.getAttribute('data-stringify-emoji');
@@ -92,7 +93,7 @@ let scraper = {
         link.outerHTML = '{{a href="' + href + '"}}' + link.textContent + '{{/a}}';
       }
     });
-    let text = textNode.textContent;
+    let text = copyNode.textContent;
 
     // Meeting agenda emoji mapping.
     text = text.replace(/:zero:/g, '0️⃣');
@@ -133,19 +134,23 @@ let scraper = {
     this.startThread();
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     let finished = Math.ceil(sidebar.scrollTop + sidebar.offsetHeight) >= sidebar.scrollHeight;
+    let user = '';
     sidebar.querySelectorAll('.c-virtual_list__item').forEach(function(message) {
       if (!this.ids.includes(message.getAttribute('id')) && !message.getAttribute('id').endsWith('_input')) {
         this.ids.push(message.getAttribute('id'));
         if (typeof(message.querySelector('a.c-message__sender_link')) !== 'undefined') {
-          let parsedMessage = this.parseText(message.querySelector('.c-message_kit__gutter__right').childNodes[4]).trim();
+          let parsedMessage = this.parseText(message.querySelector('.c-message_kit__blocks')).trim();
           if (parsedMessage.startsWith("👤")) {
             this.data += "<tr><td>(<em>anonymous</em>)</td><td>" + parsedMessage.replace("👤", '').trim() + "</td></tr>\n";
           }
           else if (parsedMessage.startsWith("🚫")) {
             this.data += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
           }
-          else {
-            let user = message.querySelector('button.c-message__sender_button').textContent;
+          else { 
+            if (message.querySelector('button.c-message__sender_button')) {
+              // Update user, if this item had a new one from the previous. Not all items list the user.
+              user = message.querySelector('button.c-message__sender_button').textContent;
+            }
 
             // Map some common usernames for easier drupal.org name crediting.
             let nameMap = new Map();
@@ -255,7 +260,7 @@ let scraper = {
     let toppost = sidebar.querySelector('.c-virtual_list__item');
     this.ids.push(toppost.getAttribute('id'));
     this.ids.push(sidebar.querySelectorAll('.c-virtual_list__item')[1].getAttribute('id'));
-    this.data += "<h2>" + this.parseText(toppost.querySelector('.c-message_kit__gutter__right').childNodes[4]) + "</h2>\n";
+    this.data += "<h2>" + this.parseText(toppost.querySelector('.c-message_kit__blocks')) + "</h2>\n";
     this.parseThread();
   }
 };
