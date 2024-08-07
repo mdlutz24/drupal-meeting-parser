@@ -85,7 +85,7 @@ let scraper = {
         image.outerHTML = image.getAttribute('data-stringify-emoji');
       }
     });
-    let links = textNode.querySelectorAll("a");
+    let links = copyNode.querySelectorAll("a");
     links.forEach(function(link) {
       // Turn links into pseudo-HTML, but avoid member mentions.
       let href = link.getAttribute('href');
