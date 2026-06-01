@@ -1,15 +1,17 @@
 let scraper = {
-  data: '',
+  threads: [],
+  currentThread: null,
   ids: [],
   users: {},
   threadInProgress: false,
-  // null is undefined, false is don't save it, true is save it.
+  currentFormat: 'html',
   threadCredits: null,
   lastTopId: null,
   threadCount: 0,
 
   clear: function () {
-    this.data = '';
+    this.threads = [];
+    this.currentThread = null;
     this.ids = [];
     this.users = {};
     this.threadInProgress = false;
@@ -24,14 +26,17 @@ let scraper = {
 
   startThread: function() {
     if (!this.isParsing()) {
-      this.data += "<table>\n";
+      this.currentThread = {
+        header: '',
+        messages: []
+      };
+      this.threads.push(this.currentThread);
       this.threadInProgress = true;
     }
   },
 
   endThread: function() {
     if (this.isParsing()) {
-      this.data += "</table>\n\n";
       if (this.threadCredits === true) {
         let button = document.querySelector('#drupal-meeting-parser-add-with-credit-button');
         button.innerHTML = 'Add with credit';
@@ -48,15 +53,12 @@ let scraper = {
       this.threadCredits = null;
       this.lastTopId = null;
 
-      // Increase and display thread count on clipboard button. Make it yellow
-      // in case this was the first thread.
       this.threadCount++;
       let button = document.querySelector('#drupal-meeting-parser-clipboard-button');
       button.innerHTML = 'Copy ' + (this.threadCount > 1 ? this.threadCount + ' threads' : 'thread') + ' to clipboard';
       button.style.backgroundColor = 'yellow';
       button.style.color = 'black';
 
-      // The main slack window has the list item of this thread, so add a checkmark there to help identify which one was saved.
       document.querySelector('div.c-virtual_list__item[tabindex="0"] .p-rich_text_section').prepend('✅ ');
     }
   },
@@ -65,15 +67,68 @@ let scraper = {
     return this.threadInProgress;
   },
 
+  render: function() {
+    let output = '';
+    let format = this.currentFormat;
+
+    for (let i = 0; i < this.threads.length; i++) {
+      let thread = this.threads[i];
+
+      if (format === 'html') {
+        let linkRegex = /\{\{a href="(.*?)"}}(.*?)\{\{\/a}}/g;
+        let header = thread.header.replaceAll(linkRegex, '<a href="$1">$2<\/a>');
+        output += "<h2>" + header + "</h2>\n";
+        output += "<table>\n";
+        for (let j = 0; j < thread.messages.length; j++) {
+          let msg = thread.messages[j];
+          let text = msg.text;
+          text = text.replaceAll(linkRegex, '<a href="$1">$2<\/a>');
+          if (msg.status === 'anonymous') {
+            output += "<tr><td>(<em>anonymous</em>)</td><td>" + text + "</td></tr>\n";
+          } else if (msg.status === 'redacted') {
+            output += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
+          } else {
+            output += "<tr><td>" + msg.user + "</td><td>" + text + "</td></tr>\n";
+          }
+        }
+        output += "</table>\n\n";
+      } else {
+        let linkRegex = /\{\{a href="(.*?)"}}(.*?)\{\{\/a}}/g;
+        let header = thread.header.replaceAll(linkRegex, '[$2]($1)');
+        output += "## " + header + "\n";
+        output += "| User | Message |\n|---|---|\n";
+        for (let j = 0; j < thread.messages.length; j++) {
+          let msg = thread.messages[j];
+          let user = msg.user;
+          let text = msg.text;
+          if (msg.status === 'anonymous') {
+            user = '(*anonymous*)';
+          } else if (msg.status === 'redacted') {
+            user = '(*anonymous*)';
+            text = '*Comment Redacted*';
+          }
+          text = text.replaceAll('|', '\\|');
+          user = user.replaceAll('|', '\\|');
+          text = text.replaceAll(linkRegex, '[$2]($1)');
+          output += "| " + user + " | " + text + " |\n";
+        }
+        output += "\n";
+      }
+    }
+
+    output += "\nParticipants:\n\n" + Object.keys(this.users).join(', ');
+    return output;
+  },
+
   display: function () {
     const el = document.createElement('textarea');
-    el.value = this.data;
-    el.value += "\n\nParticipants:\n\n" + Object.keys(this.users).join(', ');
+    el.value = this.render();
     document.body.appendChild(el);
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
-    alert('Thread memory copied to clipboard. Use the participant list to credit individuals.');
+    let formatLabel = this.currentFormat === 'markdown' ? 'Markdown' : 'HTML';
+    alert('Thread memory copied to clipboard as ' + formatLabel + '. Use the participant list to credit individuals.');
   },
 
   parseText: function(textNode) {
@@ -87,7 +142,6 @@ let scraper = {
     });
     let links = copyNode.querySelectorAll("a");
     links.forEach(function(link) {
-      // Turn links into pseudo-HTML, but avoid member mentions.
       let href = link.getAttribute('href');
       if (href !== link.textContent && href.indexOf('drupal.slack.com') === -1) {
         link.outerHTML = '{{a href="' + href + '"}}' + link.textContent + '{{/a}}';
@@ -95,7 +149,6 @@ let scraper = {
     });
     let text = copyNode.textContent;
 
-    // Meeting agenda emoji mapping.
     text = text.replace(/:zero:/g, '0️⃣');
     text = text.replace(/:one:/g, '1️⃣');
     text = text.replace(/:two:/g, '2️⃣');
@@ -108,7 +161,6 @@ let scraper = {
     text = text.replace(/:nine:/g, '9️⃣');
     text = text.replace(/:keycap_ten:/g, '🔟');
 
-    // Other emoji mapping.
     text = text.replace(/:no_entry_sign:/g, '🚫');
     text = text.replace(/:bust_in_silhouette:/g, '👤');
     text = text.replace(/:star:/g, '⭐');
@@ -119,19 +171,13 @@ let scraper = {
     text = text.replace(/:raising_hand:/g, '🙋');
     text = text.replace(/:thumbsup:/g, '👍');
 
-    // Avoid matching issue links in pseudo-HTML, so we don't get double links.
     let issues = /[^}"]https:\/\/www\.drupal\.org\/project\/.*\/([0-9]{7})/;
     text = text.replace(issues, '[#$1]');
-
-    // Convert pseudo-links to actual HTML links.
-    let linkRegex = /\{\{a href="(.*?)"}}(.*?)\{\{\/a}}/g
-    text = text.replaceAll(linkRegex, '<a href="$1">$2<\/a>')
 
     return text;
   },
 
   parseThread: function() {
-    this.startThread();
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     let finished = Math.ceil(sidebar.scrollTop + sidebar.offsetHeight) >= sidebar.scrollHeight;
     let user = '';
@@ -141,18 +187,24 @@ let scraper = {
         if (typeof(message.querySelector('a.c-message__sender_link')) !== 'undefined') {
           let parsedMessage = this.parseText(message.querySelector('.c-message_kit__blocks')).trim();
           if (parsedMessage.startsWith("👤")) {
-            this.data += "<tr><td>(<em>anonymous</em>)</td><td>" + parsedMessage.replace("👤", '').trim() + "</td></tr>\n";
+            this.currentThread.messages.push({
+              user: '',
+              text: parsedMessage.replace("👤", '').trim(),
+              status: 'anonymous'
+            });
           }
           else if (parsedMessage.startsWith("🚫")) {
-            this.data += "<tr><td>(<em>anonymous</em>)</td><td><em>Comment Redacted</em></td></tr>\n";
+            this.currentThread.messages.push({
+              user: '',
+              text: '',
+              status: 'redacted'
+            });
           }
           else { 
             if (message.querySelector('button.c-message__sender_button')) {
-              // Update user, if this item had a new one from the previous. Not all items list the user.
               user = message.querySelector('button.c-message__sender_button').textContent;
             }
 
-            // Map some common usernames for easier drupal.org name crediting.
             let nameMap = new Map();
             nameMap.set('kimb0', 'kim.pepper');
             nameMap.set('mixologic', 'Mixologic');
@@ -182,8 +234,11 @@ let scraper = {
               }
             }
 
-            // Keep the Slack name here so references to the names in messages are understandable.
-            this.data += "<tr><td>" + user + "</td><td>" + parsedMessage + "</td></tr>\n";
+            this.currentThread.messages.push({
+              user: user,
+              text: parsedMessage,
+              status: 'normal'
+            });
           }
         }
       }
@@ -198,15 +253,11 @@ let scraper = {
   },
 
   addThread: function () {
-    // Don't let another thread start before this thread finishes.
     if (this.isParsing()) {
       alert('A thread is already being parsed to be added. Wait until it finishes. If it looks finished, you found a bug. Report at https://github.com/mdlutz24/drupal-meeting-parser/issues');
       return;
     }
 
-    // Check if the current top ID is already in the parsed IDs. It may not be
-    // the absolute top ID yet, but is this thread was recorded, this ID should
-    // also already be parsed.
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
     if (this.ids.includes(this.lastTopId)) {
@@ -214,9 +265,7 @@ let scraper = {
       return;
     }
 
-    // Provide feedback on the button that parsing is happening.
     if (this.threadCredits === null) {
-      // Initialize credit logging to true if not set otherwise.
       this.threadCredits = true;
       let button = document.querySelector('#drupal-meeting-parser-add-with-credit-button');
       button.style.backgroundColor = 'gray';
@@ -234,9 +283,6 @@ let scraper = {
   },
 
   ensureScrollToTop: function() {
-    // Slack loads the bottom of threads by default. We should scroll to the top enough
-    // times to dynamically load all items in the thread and reach the starting message
-    // of the thread.
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     if (this.lastTopId != sidebar.querySelector('.c-virtual_list__item').getAttribute('id')) {
       this.lastTopId = sidebar.querySelector('.c-virtual_list__item').getAttribute('id');
@@ -249,55 +295,74 @@ let scraper = {
   },
 
   addThreadNoCredit: function () {
-    // Initialize global flag to not record credits and fall back on default
-    // thread behavior otherwise.
     this.threadCredits = false;
     this.addThread();
   },
 
   addThreadHeader: function() {
+    this.startThread();
     let sidebar = document.querySelectorAll('.p-flexpane .c-scrollbar__hider')[0];
     let toppost = sidebar.querySelector('.c-virtual_list__item');
     this.ids.push(toppost.getAttribute('id'));
     this.ids.push(sidebar.querySelectorAll('.c-virtual_list__item')[1].getAttribute('id'));
-    this.data += "<h2>" + this.parseText(toppost.querySelector('.c-message_kit__blocks')) + "</h2>\n";
+    this.currentThread.header = this.parseText(toppost.querySelector('.c-message_kit__blocks'));
     this.parseThread();
   }
 };
 
 setTimeout(function() {
   let wrapper = document.createElement('div');
-  wrapper.setAttribute('id', 'drupal-meeting-parser-wrapper');
-  wrapper.setAttribute('style', "position:absolute;width:800px;height:30px;left:10px;top:3px;z-index:1000;text-align:center;" );
-  let style="width:180px;height:30px;margin-left:5px;margin-right:5px;background-color:yellow;color:black;cursor:pointer;display:inline-block;border-radius:4px;border: 1px solid black;box-shadow: 1px 1px #ddd;";
-  let clearThread = document.createElement('button');
-  clearThread.addEventListener('click', scraper.clear.bind(scraper));
-  clearThread.setAttribute('style', style);
-  clearThread.setAttribute('value', 'Clear memory');
-  clearThread.setAttribute('id', 'drupal-meeting-parser-clear-button');
-  clearThread.appendChild(document.createTextNode('Clear memory'));
-  let addThread = document.createElement('button');
-  addThread.addEventListener('click', scraper.addThread.bind(scraper));
-  addThread.setAttribute('style', style);
-  addThread.setAttribute('value', 'Add with credit');
-  addThread.setAttribute('id', 'drupal-meeting-parser-add-with-credit-button');
-  addThread.appendChild(document.createTextNode('Add with credit'));
-  let addThreadNoCredit = document.createElement('button');
-  addThreadNoCredit.addEventListener('click', scraper.addThreadNoCredit.bind(scraper));
-  addThreadNoCredit.setAttribute('style', style);
-  addThreadNoCredit.setAttribute('value', 'Add without credit');
-  addThreadNoCredit.appendChild(document.createTextNode('Add without credit'));
-  addThreadNoCredit.setAttribute('id', 'drupal-meeting-parser-add-without-credit-button');
-  let displayThread = document.createElement('button');
-  displayThread.addEventListener('click', scraper.display.bind(scraper));
-  displayThread.setAttribute('style', style + 'background-color:gray; color: white;');
-  displayThread.setAttribute('value', 'Copy to clipboard');
-  displayThread.setAttribute('id', 'drupal-meeting-parser-clipboard-button');
-  displayThread.appendChild(document.createTextNode('Copy to clipboard'));
-  wrapper.appendChild(clearThread);
-  wrapper.appendChild(addThread);
-  wrapper.appendChild(addThreadNoCredit);
-  wrapper.appendChild(displayThread);
+   wrapper.setAttribute('id', 'drupal-meeting-parser-wrapper');
+   wrapper.setAttribute('style', "position:absolute;width:800px;height:90px;left:10px;top:3px;z-index:1000;text-align:center;" );
+   let style="width:180px;height:30px;margin-left:5px;margin-right:5px;background-color:yellow;color:black;cursor:pointer;display:inline-block;border-radius:4px;border: 1px solid black;box-shadow: 1px 1px #ddd;";
+
+   let clearThread = document.createElement('button');
+   clearThread.addEventListener('click', scraper.clear.bind(scraper));
+   clearThread.setAttribute('style', style);
+   clearThread.setAttribute('value', 'Clear memory');
+   clearThread.setAttribute('id', 'drupal-meeting-parser-clear-button');
+   clearThread.appendChild(document.createTextNode('Clear memory'));
+   let addThread = document.createElement('button');
+   addThread.addEventListener('click', scraper.addThread.bind(scraper));
+   addThread.setAttribute('style', style);
+   addThread.setAttribute('value', 'Add with credit');
+   addThread.setAttribute('id', 'drupal-meeting-parser-add-with-credit-button');
+   addThread.appendChild(document.createTextNode('Add with credit'));
+   let addThreadNoCredit = document.createElement('button');
+   addThreadNoCredit.addEventListener('click', scraper.addThreadNoCredit.bind(scraper));
+   addThreadNoCredit.setAttribute('style', style);
+   addThreadNoCredit.setAttribute('value', 'Add without credit');
+   addThreadNoCredit.appendChild(document.createTextNode('Add without credit'));
+   addThreadNoCredit.setAttribute('id', 'drupal-meeting-parser-add-without-credit-button');
+   let displayThread = document.createElement('button');
+   displayThread.addEventListener('click', scraper.display.bind(scraper));
+   displayThread.setAttribute('style', style + 'background-color:gray; color: white;');
+   displayThread.setAttribute('value', 'Copy to clipboard');
+   displayThread.setAttribute('id', 'drupal-meeting-parser-clipboard-button');
+   displayThread.appendChild(document.createTextNode('Copy to clipboard'));
+   wrapper.appendChild(clearThread);
+   wrapper.appendChild(addThread);
+   wrapper.appendChild(addThreadNoCredit);
+   wrapper.appendChild(displayThread);
+
+   // Second row for format selection.
+   let formatWrapper = document.createElement('div');
+   formatWrapper.setAttribute('style', 'padding-top:5px;text-align:left;padding-left:20px;');
+   let formatSelector = document.createElement('select');
+   formatSelector.setAttribute('style', style.replace('width:180px', 'width:140px'));
+   let htmlOption = document.createElement('option');
+   htmlOption.setAttribute('value', 'html');
+   htmlOption.innerText = 'HTML';
+   let markdownOption = document.createElement('option');
+   markdownOption.setAttribute('value', 'markdown');
+   markdownOption.innerText = 'Markdown';
+   formatSelector.appendChild(htmlOption);
+   formatSelector.appendChild(markdownOption);
+   formatSelector.addEventListener('change', function(event) {
+     scraper.currentFormat = event.target.value;
+   });
+   formatWrapper.appendChild(formatSelector);
+   wrapper.appendChild(formatWrapper);
 
   let body = document.querySelector('body');
   body.insertBefore(wrapper, body.firstChild);
