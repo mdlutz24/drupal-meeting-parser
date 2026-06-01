@@ -1,10 +1,20 @@
 {
   "name": "Drupal Meeting Parser",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Parses Drupal meeting threads for public archiving",
   "manifest_version": 3,
   "icons": {
     "128": "icon.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "strict_min_version": "65.0.0",
+      "id": "drupal-meeting-parser@example.com",
+      "data_collection_permissions": {
+        "required": ["websiteContent"],
+        "optional": []
+      }
+    }
   },
   "content_scripts": [
     {

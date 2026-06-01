@@ -1,0 +1,25 @@
+{
+  "name": "drupal-meeting-parser",
+  "version": "1.0.0",
+  "description": "Dirty chrome extension to copy Drupal slack meeting threads to the clipboard.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "web-ext lint -s .",
+    "test": "npm run lint",
+    "build": "web-ext build --ignore-files=dist node_modules package* --source-dir=. --artifacts-dir=dist --overwrite-dest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdlutz24/drupal-meeting-parser.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/mdlutz24/drupal-meeting-parser/issues"
+  },
+  "homepage": "https://github.com/mdlutz24/drupal-meeting-parser#readme",
+  "devDependencies": {
+    "copyfiles-ng": "^2.4.6",
+    "web-ext": "^10.1.0"
+  }
+}

@@ -9,6 +9,8 @@ Crediting meeting participants is facilitated as well.
 
 ## How to install
 
+### Google Chrome or Chromium
+
 1. Enable developer mode for Google Chrome Extensions. 
    See https://developer.chrome.com/extensions/faq#faq-dev-01
 
@@ -21,9 +23,21 @@ Crediting meeting participants is facilitated as well.
 4. A grayed out Drupal meeting parser icon will appear in your browser alongside
    the URL bar.
 
-4. Open the chatroom in Google Chrome. The icon will become blue and four
+5. Open the chatroom in Google Chrome. The icon will become blue and four
    bright yellow buttons should apear on the top of the page: Clear memory, 
-   Add with credit, Add without credit and To clipboard.
+   Add with credit, Add without credit and Copy to clipboard.
+
+### Firefox
+
+1. Download the release zip file from the releases page.
+
+2. Use the "Install Add-on from File" option from the `about:addons` page.
+
+3. A grayed out Drupal meeting parser icon will appear in your add-ons list.
+
+4. Open the chatroom in Firefox. Four bright yellow buttons should appear on
+  top of the page: Clear memory, Add with credit, Add without credit, and
+  Copy to clipboard.
 
 ## When to use
 
